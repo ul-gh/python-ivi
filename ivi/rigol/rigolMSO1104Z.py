@@ -2,7 +2,7 @@
 
 Python Interchangeable Virtual Instrument Library
 
-Copyright (c) 2013-2017 Alex Forencich
+Copyright (c) 2017 Alex Forencich
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,26 +24,20 @@ THE SOFTWARE.
 
 """
 
-# Oscilloscopes
-# DS1000Z
-from .rigolDS1074Z import rigolDS1074Z
-from .rigolDS1074ZS import rigolDS1074ZS
-from .rigolDS1104Z import rigolDS1104Z
-from .rigolDS1104ZS import rigolDS1104ZS
-from .rigolMSO1074Z import rigolMSO1074Z
-from .rigolMSO1074ZS import rigolMSO1074ZS
-from .rigolMSO1104Z import rigolMSO1104Z
-from .rigolMSO1104ZS import rigolMSO1104ZS
+from .rigolDS1000Z import *
 
-# DC Power Supplies
-# DP800
-from .rigolDP831A import rigolDP831A
-from .rigolDP832 import rigolDP832
-from .rigolDP832A import rigolDP832A
-# DP1000
-from .rigolDP1116A import rigolDP1116A
-from .rigolDP1308A import rigolDP1308A
-
-# Digital Multimeters
-#DM3068
-from .rigolDM3068Agilent import rigolDM3068Agilent
+class rigolMSO1104Z(rigolDS1000Z):
+    "Rigol MSO1104Z IVI oscilloscope driver"
+    
+    def __init__(self, *args, **kwargs):
+        super(rigolMSO1104Z, self).__init__(*args, **kwargs)
+        
+        self._instrument_id = 'RIGOL TECHNOLOGIES,MSO1104Z'
+        self._analog_channel_count = 4
+        self._digital_channel_count = 16
+        self._channel_count = self._analog_channel_count + self._digital_channel_count
+        self._bandwidth = 100e6
+        
+        self._init_channels()
+    
+    
