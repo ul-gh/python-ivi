@@ -168,7 +168,6 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         self._vertical_divisions = 8
 
         self._timebase_mode = 'main'
-        self._timebase_reference = 'center'
         self._timebase_position = 0.0
         self._timebase_range = 1e-3
         self._timebase_scale = 100e-6
@@ -241,21 +240,6 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
                         * 'window': zoomed or delayed timebase
                         * 'xy': channels are plotted against each other, no timebase
                         * 'roll': data moves continuously from left to right
-                        """))
-        self._add_property('timebase.reference',
-                        self._get_timebase_reference,
-                        self._set_timebase_reference,
-                        None,
-                        ivi.Doc("""
-                        Sets the time reference to one division from the left side of the screen,
-                        to the center of the screen, or to one division from the right side of the
-                        screen. Time reference is the point on the display where the trigger point
-                        is referenced.
-
-                        Values:
-                        * 'left'
-                        * 'center'
-                        * 'right'
                         """))
         self._add_property('timebase.position',
                         self._get_timebase_position,
@@ -454,21 +438,6 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
                 self._write("timebase:delay:enable 0")
                 self._write(":timebase:mode %s" % TimebaseModeMapping[value])
         self._timebase_mode = value
-        self._set_cache_valid()
-
-    def _get_timebase_reference(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
-            value = self._ask(":timebase:reference?").lower()
-            self._timebase_reference = [k for k,v in TimebaseReferenceMapping.items() if v==value][0]
-            self._set_cache_valid()
-        return self._timebase_reference
-
-    def _set_timebase_reference(self, value):
-        if value not in TimebaseReferenceMapping:
-            raise ivi.ValueNotSupportedException()
-        if not self._driver_operation_simulate:
-            self._write(":timebase:reference %s" % TimebaseReferenceMapping[value])
-        self._timebase_reference = value
         self._set_cache_valid()
 
     def _get_timebase_position(self):
