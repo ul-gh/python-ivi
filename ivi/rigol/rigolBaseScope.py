@@ -1084,8 +1084,8 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         trace.x_origin = float(pre[5])
         trace.x_reference = int(float(pre[6]))
         trace.y_increment = float(pre[7])
-        trace.y_origin = float(pre[8])
-        trace.y_reference = int(float(pre[9]))
+        trace.y_origin = 0.0
+        trace.y_reference = int(float(pre[9]) + float(pre[8]))
 
         if acq_format != 0:
             raise UnexpectedResponseException()
