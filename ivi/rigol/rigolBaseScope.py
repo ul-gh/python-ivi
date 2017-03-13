@@ -1151,8 +1151,8 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
 
     def _set_reference_level_middle(self, value):
         value = float(value)
-        if value < 7: value = 7
-        if value > 95: value = 95
+        if value < 6: value = 6
+        if value > 94: value = 94
         if not self._driver_operation_simulate:
             self._write(":measure:setup:mid %e" % value)
         self._reference_level_middle = value
