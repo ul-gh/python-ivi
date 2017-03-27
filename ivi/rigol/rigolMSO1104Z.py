@@ -28,16 +28,16 @@ from .rigolDS1000Z import *
 
 class rigolMSO1104Z(rigolDS1000Z):
     "Rigol MSO1104Z IVI oscilloscope driver"
-    
+
     def __init__(self, *args, **kwargs):
+        self.__dict__.setdefault('_instrument_id', 'MSO1104Z')
+
         super(rigolMSO1104Z, self).__init__(*args, **kwargs)
-        
-        self._instrument_id = 'RIGOL TECHNOLOGIES,MSO1104Z'
+
         self._analog_channel_count = 4
         self._digital_channel_count = 16
         self._channel_count = self._analog_channel_count + self._digital_channel_count
         self._bandwidth = 100e6
-        
+
         self._init_channels()
-    
-    
+
