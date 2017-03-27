@@ -739,23 +739,12 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
 
     def _get_channel_range(self, index):
         index = ivi.get_index(self._channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
-            self._channel_range[index] = float(self._ask(":%s:range?" % self._channel_name[index]))
-            self._channel_scale[index] = self._channel_range[index] / self._vertical_divisions
-            self._set_cache_valid(index=index)
-            self._set_cache_valid(True, "channel_scale", index)
-        return self._channel_range[index]
+        return self._get_channel_scale(index) * self._vertical_divisions
 
     def _set_channel_range(self, index, value):
         index = ivi.get_index(self._channel_name, index)
         value = float(value)
-        if not self._driver_operation_simulate:
-            self._write(":%s:range %e" % (self._channel_name[index], value))
-        self._channel_range[index] = value
-        self._channel_scale[index] = value / self._vertical_divisions
-        self._set_cache_valid(index=index)
-        self._set_cache_valid(True, "channel_scale", index)
-        self._set_cache_valid(False, "channel_offset", index)
+        self._set_channel_range(index, value / self._vertical_divisions)
 
     def _get_channel_scale(self, index):
         index = ivi.get_index(self._channel_name, index)
