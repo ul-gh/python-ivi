@@ -28,15 +28,12 @@ from .rigolBaseScope import *
 
 class rigolDS1000Z(rigolBaseScope):
     "Rigol DS1000Z series IVI oscilloscope driver"
-    
+
     def __init__(self, *args, **kwargs):
         self.__dict__.setdefault('_instrument_id', '')
 
         super(rigolDS1000Z, self).__init__(*args, **kwargs)
-        
+
         self._identity_description = "Rigol DS1000Z series IVI oscilloscope driver"
-        self._identity_supported_instrument_models = ['DS1074Z', 'DS1074ZS', 'DS1104Z', 'DS1104ZS',
-                'MSO1074Z', 'MSO1074ZS', 'MSO1104Z', 'MSO1104ZS']
-        
-    
-    
+        self._identity_supported_instrument_models = ['DS1074Z', 'DS1104Z', 'MSO1074Z', 'MSO1104Z']
+

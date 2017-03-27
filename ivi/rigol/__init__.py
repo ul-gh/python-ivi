@@ -27,13 +27,9 @@ THE SOFTWARE.
 # Oscilloscopes
 # DS1000Z
 from .rigolDS1074Z import rigolDS1074Z
-from .rigolDS1074ZS import rigolDS1074ZS
 from .rigolDS1104Z import rigolDS1104Z
-from .rigolDS1104ZS import rigolDS1104ZS
 from .rigolMSO1074Z import rigolMSO1074Z
-from .rigolMSO1074ZS import rigolMSO1074ZS
 from .rigolMSO1104Z import rigolMSO1104Z
-from .rigolMSO1104ZS import rigolMSO1104ZS
 
 # DC Power Supplies
 # DP800
