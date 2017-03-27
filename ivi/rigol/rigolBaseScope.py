@@ -25,6 +25,7 @@ THE SOFTWARE.
 """
 
 import array
+import math
 import time
 
 from .. import ivi
@@ -164,6 +165,7 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         self._channel_count = self._analog_channel_count + self._digital_channel_count
         self._bandwidth = 1e9
         self._bandwidth_limit = {'20M': 20e6}
+        self._max_averages = 1024
 
         self._horizontal_divisions = 12
         self._vertical_divisions = 8
@@ -1185,8 +1187,9 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         return self._acquisition_number_of_averages
 
     def _set_acquisition_number_of_averages(self, value):
-        if value < 2 or value > 1024:
+        if value < 2 or value > self._max_averages:
             raise ivi.OutOfRangeException()
+        value = 2**round(math.log(value, 2))
         if not self._driver_operation_simulate:
             self._write(":acquire:averages %d" % value)
         self._acquisition_number_of_averages = value
