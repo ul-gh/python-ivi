@@ -1221,7 +1221,7 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         if not self._driver_operation_simulate and not self._get_cache_valid():
             value = self._ask(":trigger:sweep?").lower()
             if value == 'sing':
-                self._trigger_modifier = 'auto'
+                self._trigger_modifier = 'none'
             else:
                 self._trigger_modifier = [k for k,v in TriggerModifierMapping.items() if v==value][0]
                 self._set_cache_valid()
