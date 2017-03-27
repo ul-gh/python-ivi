@@ -25,28 +25,38 @@ THE SOFTWARE.
 """
 
 from .rigolBaseScope import *
+from .rigolDSSource import *
 
 ScreenshotImageFormatMapping = {
         'bmp': 'bmp',
         'bmp24': 'bmp24'}
 
-class rigolDS2000A(rigolBaseScope):
+class rigolDS2000A(rigolBaseScope, rigolDSSource):
     "Rigol DS2000A series IVI oscilloscope driver"
 
     def __init__(self, *args, **kwargs):
         super(rigolDS2000A, self).__init__(*args, **kwargs)
 
+        self._analog_channel_count = 2
+        self._digital_channel_count = 16
+        self._bandwidth = 300e6
+        self._bandwidth_limit = {'20M': 20e6, '100M': 100e6}
+        self._max_averages = 8192
+
         self._horizontal_divisions = 14
         self._vertical_divisions = 8
 
-        self._bandwidth_limit = {'20M': 20e6, '100M': 100e6}
-        self._max_averages = 8192
+        # Internal source
+        self._output_count = 2
 
         self._display_screenshot_image_format_mapping = ScreenshotImageFormatMapping
 
         self._identity_description = "Rigol DS2000A series IVI oscilloscope driver"
         self._identity_supported_instrument_models = ['DS2074A', 'DS2104A', 'DS2204A',
                 'DS2304A', 'MSO2074A', 'MSO2104A', 'MSO2204A', 'MSO2304A']
+
+        self._init_channels()
+        self._init_outputs()
 
     def _display_fetch_screenshot(self, format='bmp', invert=False):
         if self._driver_operation_simulate:
