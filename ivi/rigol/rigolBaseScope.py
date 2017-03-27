@@ -163,6 +163,7 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         self._digital_channel_count = 16
         self._channel_count = self._analog_channel_count + self._digital_channel_count
         self._bandwidth = 1e9
+        self._bandwidth_limit = {'20M': 20e6}
 
         self._horizontal_divisions = 12
         self._vertical_divisions = 8
@@ -188,14 +189,6 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         self._identity_specification_minor_version = 1
         self._identity_supported_instrument_models = ['']
 
-        self._add_property('channels[].bw_limit',
-                        self._get_channel_bw_limit,
-                        self._set_channel_bw_limit,
-                        None,
-                        ivi.Doc("""
-                        Commands an internal low-pass filter.  When the filter is on, the
-                        bandwidth of the channel is limited to approximately 25 MHz.
-                        """))
         self._add_property('channels[].invert',
                         self._get_channel_invert,
                         self._set_channel_invert,
@@ -632,13 +625,27 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
 
     def _get_channel_input_frequency_max(self, index):
         index = ivi.get_index(self._analog_channel_name, index)
+        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+            value = self._ask(":%s:bwlimit?" % self._channel_name[index]).upper()
+            if value == 'OFF':
+                self._channel_input_frequency_max[index] = self._bandwidth
+            else:
+                self._channel_input_frequency_max[index] = self._bandwidth_limit[value]
         return self._channel_input_frequency_max[index]
 
     def _set_channel_input_frequency_max(self, index, value):
         value = float(value)
         index = ivi.get_index(self._analog_channel_name, index)
         if not self._driver_operation_simulate:
-            self._set_channel_bw_limit(index, value < 20e6)
+            limit = 'OFF'
+            bw = self._bandwidth
+
+            for l, b in self._bandwidth_limit.items():
+                if b < bw and b > value:
+                    limit, bw = l, b
+
+            value = bw
+            self._write(":%s:bwlimit %s" % (self._channel_name[index], limit))
         self._channel_input_frequency_max[index] = value
         self._set_cache_valid(index=index)
 
@@ -689,21 +696,6 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         if not self._driver_operation_simulate:
             self._write(":%s:invert %d" % (self._channel_name[index], value))
         self._channel_invert[index] = value
-        self._set_cache_valid(index=index)
-
-    def _get_channel_bw_limit(self, index):
-        index = ivi.get_index(self._analog_channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
-            self._channel_bw_limit[index] = self._ask(":%s:bwlimit?" % self._channel_name[index]).lower() == '20m'
-            self._set_cache_valid(index=index)
-        return self._channel_bw_limit[index]
-
-    def _set_channel_bw_limit(self, index, value):
-        index = ivi.get_index(self._analog_channel_name, index)
-        value = bool(value)
-        if not self._driver_operation_simulate:
-            self._write(":%s:bwlimit %s" % (self._channel_name[index], ('20m' if value else 'off')))
-        self._channel_bw_limit[index] = value
         self._set_cache_valid(index=index)
 
     def _get_channel_coupling(self, index):
