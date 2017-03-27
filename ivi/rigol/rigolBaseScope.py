@@ -81,7 +81,7 @@ PolarityMapping = {'positive': 'pos',
         'negative': 'neg'}
 GlitchConditionMapping = {'less_than': 'less',
         'greater_than': 'gre'}
-WidthConditionMapping = {'within': 'rang', 'outside': ''}
+WidthConditionMapping = {'within': ''}
 SlopeMapping = {
         'positive': 'pos',
         'negative': 'neg',
@@ -849,7 +849,7 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
                 src = self._ask(":trigger:edge:source?").lower()
                 if src == 'ac':
                     value = 'ac_line'
-            elif value == 'glit':
+            elif value == 'puls':
                 qual = self._ask(":trigger:pulse:when?").lower()
                 if qual in ('pgl', 'ngl'):
                     value = 'width'
@@ -869,15 +869,21 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
             if value == 'ac_line':
                 self._write(":trigger:edge:source ac")
             if value == 'glitch':
-                if self._trigger_glitch_condition == 'greater_than':
-                    self._write(":trigger:glitch:qualifier greaterthan")
+                if self._get_trigger_glitch_condition() == 'greater_than':
+                    if self._get_trigger_width_polarity() == 'positive':
+                        self._write(":trigger:pulse:when pgr")
+                    else:
+                        self._write(":trigger:pulse:when ngr")
                 else:
-                    self._write(":trigger:glitch:qualifier lessthan")
+                    if self._get_trigger_width_polarity() == 'positive':
+                        self._write(":trigger:pulse:when ples")
+                    else:
+                        self._write(":trigger:pulse:when nles")
             if value == 'width':
-                if self._trigger_width_condition == 'within':
-                    self._write(":trigger:glitch:qualifier range")
-                elif self._trigger_width_condition == 'outside':
-                    self._write(":trigger:glitch:qualifier range")
+                if self._get_trigger_width_polarity() == 'positive':
+                    self._write(":trigger:pulse:when pgl")
+                else:
+                    self._write(":trigger:pulse:when ngl")
         self._trigger_type = value
         self._set_cache_valid()
 
@@ -949,9 +955,12 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
 
     def _get_trigger_glitch_condition(self):
         if not self._driver_operation_simulate and not self._get_cache_valid():
-            value = self._ask(":trigger:glitch:qualifier?").lower()
-            if value in GlitchConditionMapping.values():
-                self._trigger_glitch_condition = [k for k,v in GlitchConditionMapping.items() if v==value][0]
+            value = self._ask(":trigger:pulse:when?").lower()
+            if value in ('pgr', 'ngr'):
+                self._trigger_glitch_condition = 'greater_than'
+                self._set_cache_valid()
+            elif value in ('ples', 'nles'):
+                self._trigger_glitch_condition = 'less_than'
                 self._set_cache_valid()
         return self._trigger_glitch_condition
 
@@ -959,7 +968,10 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         if value not in GlitchConditionMapping:
             raise ivi.ValueNotSupportedException()
         if not self._driver_operation_simulate:
-            self._write(":trigger:glitch:qualifier %s" % GlitchConditionMapping[value])
+            if self._get_trigger_glitch_polarity() == 'positive':
+                self._write(":trigger:pulse:when %s" % ('pgr' if value == 'greater_than' else 'ples'))
+            else:
+                self._write(":trigger:pulse:when %s" % ('ngr' if value == 'greater_than' else 'nles'))
         self._trigger_glitch_condition = value
         self._set_cache_valid()
 
@@ -984,17 +996,12 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
 
     def _get_trigger_width_condition(self):
         if not self._driver_operation_simulate and not self._get_cache_valid():
-            value = self._ask(":trigger:glitch:qualifier?").lower()
-            if value in WidthConditionMapping.values():
-                self._trigger_width_condition = [k for k,v in WidthConditionMapping.items() if v==value][0]
-                self._set_cache_valid()
+            value = 'within'
         return self._trigger_width_condition
 
     def _set_trigger_width_condition(self, value):
         if value not in WidthConditionMapping:
             raise ivi.ValueNotSupportedException()
-        if not self._driver_operation_simulate:
-            self._write(":trigger:glitch:qualifier %s" % WidthConditionMapping[value])
         self._trigger_width_condition = value
         self._set_cache_valid()
 
@@ -1026,16 +1033,31 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
 
     def _get_trigger_width_polarity(self):
         if not self._driver_operation_simulate and not self._get_cache_valid():
-            value = self._ask(":trigger:glitch:polarity?").lower()
-            self._trigger_width_polarity = [k for k,v in PolarityMapping.items() if v==value][0]
+            value = self._ask(":trigger:pulse:when?").lower()
+            self._trigger_width_polarity = 'positive' if value.lower() in ('pgr', 'ples', 'pgl') else 'negative'
             self._set_cache_valid()
         return self._trigger_width_polarity
 
     def _set_trigger_width_polarity(self, value):
-        if value not in Polarity:
+        if value not in PolarityMapping:
             raise ivi.ValueNotSupportedException()
         if not self._driver_operation_simulate:
-            self._write(":trigger:glitch:polarity %s" % PolarityMapping[value])
+            if self._get_trigger_type() == 'glitch':
+                if self._get_trigger_glitch_condition() == 'greater_than':
+                    if value == 'positive':
+                        self._write(":trigger:pulse:when pgr")
+                    else:
+                        self._write(":trigger:pulse:when ngr")
+                else:
+                    if value == 'positive':
+                        self._write(":trigger:pulse:when ples")
+                    else:
+                        self._write(":trigger:pulse:when nles")
+            if self._get_trigger_type() == 'width':
+                if value == 'positive':
+                    self._write(":trigger:pulse:when pgl")
+                else:
+                    self._write(":trigger:pulse:when ngl")
         self._trigger_width_polarity = value
         self._set_cache_valid()
 
