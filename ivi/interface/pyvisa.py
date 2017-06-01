@@ -47,14 +47,25 @@ except:
         (e.__class__.__name__, e.args[0]))
     raise ImportError
 
+def list_resources():
+    "List PyVisa resource strings"
+    try:
+        # New style PyVISA
+        return visa_rm.list_resources()
+    except AttributeError:
+        # Old style PyVISA
+        return visa.get_instruments_list()
+
+    return []
+
 class PyVisaInstrument:
     "PyVisa wrapper instrument interface client"
     def __init__(self, resource, *args, **kwargs):
         if type(resource) is str:
             self.instrument = visa_instrument_opener(resource, *args, **kwargs)
-            # For compatibility with new style PyVISA
-            if not hasattr(self.instrument, 'trigger'):
-                self.instrument.trigger = self.instrument.assert_trigger
+            # For compatibility with old style PyVISA
+            if not hasattr(self.instrument, 'assert_trigger'):
+                self.instrument.assert_trigger = self.instrument.trigger
         else:
             self.instrument = resource
         self.buffer = io.BytesIO()
@@ -108,11 +119,11 @@ class PyVisaInstrument:
 
     def trigger(self):
         "Send trigger command"
-        self.instrument.trigger()
+        self.instrument.assert_trigger()
 
     def clear(self):
         "Send clear command"
-        raise NotImplementedError()
+        self.instrument.clear()
 
     def remote(self):
         "Send remote command"
@@ -120,12 +131,12 @@ class PyVisaInstrument:
 
     def local(self):
         "Send local command"
-        raise NotImplementedError()
+        return self.instrument.read_stb()
 
     def lock(self):
         "Send lock command"
-        raise NotImplementedError()
+        self.instrument.lock()
 
     def unlock(self):
         "Send unlock command"
-        raise NotImplementedError()
+        self.instrument.unlock()

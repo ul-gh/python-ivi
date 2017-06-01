@@ -770,6 +770,13 @@ def list_resources():
         except:
             pass
 
+    if 'pyvisa' in globals():
+        # PyVisa resources
+        try:
+            res.extend(pyvisa.list_resources())
+        except:
+            pass
+
     return res
 
 
