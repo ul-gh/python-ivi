@@ -721,7 +721,7 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
     def _get_channel_offset(self, index):
         index = ivi.get_index(self._channel_name, index)
         if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
-            self._channel_offset[index] = float(self._ask(":%s:offset?" % self._channel_name[index]))
+            self._channel_offset[index] = -float(self._ask(":%s:offset?" % self._channel_name[index]))
             self._set_cache_valid(index=index)
         return self._channel_offset[index]
 
@@ -729,7 +729,7 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         index = ivi.get_index(self._channel_name, index)
         value = float(value)
         if not self._driver_operation_simulate:
-            self._write(":%s:offset %e" % (self._channel_name[index], value))
+            self._write(":%s:offset %e" % (self._channel_name[index], -value))
         self._channel_offset[index] = value
         self._set_cache_valid(index=index)
 
