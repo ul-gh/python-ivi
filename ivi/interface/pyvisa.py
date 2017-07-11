@@ -127,11 +127,11 @@ class PyVisaInstrument:
 
     def remote(self):
         "Send remote command"
-        raise NotImplementedError()
+        self.instrument.control_ren(visa.constants.VI_GPIB_REN_ASSERT_ADDRESS)
 
     def local(self):
         "Send local command"
-        raise NotImplementedError()
+        self.instrument.control_ren(visa.constants.VI_GPIB_REN_ADDRESS_GTL)
 
     def lock(self):
         "Send lock command"
