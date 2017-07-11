@@ -115,7 +115,7 @@ class PyVisaInstrument:
 
     def read_stb(self):
         "Read status byte"
-        raise NotImplementedError()
+        return self.instrument.read_stb()
 
     def trigger(self):
         "Send trigger command"
@@ -131,7 +131,7 @@ class PyVisaInstrument:
 
     def local(self):
         "Send local command"
-        return self.instrument.read_stb()
+        raise NotImplementedError()
 
     def lock(self):
         "Send lock command"
