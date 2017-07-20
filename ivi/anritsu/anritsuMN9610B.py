@@ -147,7 +147,9 @@ class anritsuMN9610B(ivi.Driver):
         return self._attenuation
 
     def _set_attenuation(self, value):
-        value = float(value)
+        value = round(float(value), 2)
+        if value < -99.99 or value > 159.99:
+            raise ivi.OutOfRangeException()
         if not self._driver_operation_simulate:
             self._write("ATT %.2f" % (value))
         self._attenuation = value
@@ -161,7 +163,9 @@ class anritsuMN9610B(ivi.Driver):
         return self._reference
 
     def _set_reference(self, value):
-        value = float(value)
+        value = round(float(value), 2)
+        if value < -99.99 or value > 99.99:
+            raise ivi.OutOfRangeException()
         if not self._driver_operation_simulate:
             self._write("OFS %.2f" % (value))
         self._reference = value
@@ -176,7 +180,9 @@ class anritsuMN9610B(ivi.Driver):
         return self._wavelength
 
     def _set_wavelength(self, value):
-        value = float(value)
+        value = round(float(value), 9)
+        if value < -1100e-9 or value > 1650e-9:
+            raise ivi.OutOfRangeException()
         if not self._driver_operation_simulate:
             self._write("WVL %de-9" % (int(value*1e9)))
         self._wavelength = value
