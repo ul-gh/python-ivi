@@ -415,7 +415,7 @@ class TraceY(object):
     "Y trace object"
     def __init__(self):
         self.average_count = 1
-        self.y_increment = 0
+        self.y_increment = 1
         self.y_origin = 0
         self.y_reference = 0
         self.y_raw = None
@@ -445,11 +445,43 @@ class TraceY(object):
         return len(self.y_raw)
 
 
+class TraceXY(TraceY):
+    "X-Y trace object"
+    def __init__(self):
+        super(TraceXY, self).__init__()
+        self.x_increment = 1
+        self.x_origin = 0
+        self.x_reference = 0
+        self.x_raw = None
+
+    @property
+    def x(self):
+        if self.x_raw is None:
+            return ((np.arange(len(self.y_raw)) - self.x_reference) * self.x_increment) + self.x_origin
+        else:
+            return ((np.array(self.x_raw).astype(float) - self.x_reference) * self.x_increment) + self.x_origin
+
+    def __getitem__(self, index):
+        y = self.y_raw[index]
+        if y == self.y_hole:
+            y = float('nan')
+        x = index
+        if self.x_raw is not None:
+            x = self.x_raw[index]
+        return (((x - self.x_reference) * self.x_increment) + self.x_origin, ((y - self.y_reference) * self.y_increment) + self.y_origin)
+
+    def __iter__(self):
+        if self.x_raw is None:
+            return ((((i - self.x_reference) * self.x_increment) + self.x_origin, float('nan') if y == self.y_hole else ((y - self.y_reference) * self.y_increment) + self.y_origin) for i, y in enumerate(self.y_raw))
+        else:
+            return ((((x - self.x_reference) * self.x_increment) + self.x_origin, float('nan') if y == self.y_hole else ((y - self.y_reference) * self.y_increment) + self.y_origin) for x, y in zip(self.x_raw, self.y_raw))
+
+
 class TraceYT(TraceY):
     "Y-T trace object"
     def __init__(self):
         super(TraceYT, self).__init__()
-        self.x_increment = 0
+        self.x_increment = 1
         self.x_origin = 0
         self.x_reference = 0
 
