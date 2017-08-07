@@ -90,3 +90,71 @@ class rigolDS2000A(rigolBaseScope, rigolDSSource):
         self._set_cache_valid(False, 'channel_range', index)
         self._set_cache_valid(False, 'trigger_level')
 
+    def _measurement_fetch_waveform(self, index):
+        index = ivi.get_index(self._channel_name, index)
+
+        if self._driver_operation_simulate:
+            return ivi.TraceYT()
+
+        if self._channel_name[index] in self._digital_channel_name:
+            self._write(":waveform:source la")
+            self._write(":waveform:format word")
+        else:
+            self._write(":waveform:source %s" % self._channel_name[index])
+            self._write(":waveform:format byte")
+        self._write(":waveform:mode max")
+
+        trace = ivi.TraceYT()
+
+        # Read preamble
+        pre = self._ask(":waveform:preamble?").split(',')
+
+        acq_format = int(pre[0])
+        acq_type = int(pre[1])
+        points = int(pre[2])
+        trace.average_count = int(pre[3])
+        trace.x_increment = float(pre[4])
+        trace.x_origin = float(pre[5])
+        trace.x_reference = int(float(pre[6]))
+        trace.y_increment = float(pre[7])
+        trace.y_origin = 0.0
+        trace.y_reference = int(float(pre[9]) + float(pre[8]))
+
+        if acq_format == 0:
+            block_size = 250000
+        elif acq_format == 1:
+            block_size = 125000
+        else:
+            raise UnexpectedResponseException()
+
+        # Read waveform data
+        data = bytearray()
+
+        for offset in range(1, points+1, block_size):
+            self._write(":waveform:start %d" % offset)
+            self._write(":waveform:stop %d" % min(points, offset+block_size-1))
+            self._write(":waveform:data?")
+            raw_data = self._read_raw()
+            data.extend(ivi.decode_ieee_block(raw_data))
+
+        # Store in trace object
+        if acq_format == 0:
+            trace.y_raw = array.array('B', data[0:points])
+        elif acq_format == 1:
+            trace.y_raw = array.array('H', data[0:points*2])
+
+            if sys.byteorder == 'big':
+                trace.y_raw.byteswap()
+
+        # handle digital channels
+        if self._channel_name[index] in self._digital_channel_name:
+            trace.y_increment = 1
+
+            # extract channel from group
+            digital_index = self._digital_channel_name.index(self._channel_name[index])
+            
+            for k in range(points):
+                trace.y_raw[k] = (trace.y_raw[k] >> offset) & 1
+
+        return trace
+
