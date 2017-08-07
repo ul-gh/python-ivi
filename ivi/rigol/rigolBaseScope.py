@@ -26,6 +26,7 @@ THE SOFTWARE.
 
 import array
 import math
+import sys
 import time
 
 from .. import ivi
@@ -1100,21 +1101,31 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         trace.y_origin = 0.0
         trace.y_reference = int(float(pre[9]) + float(pre[8]))
 
-        if acq_format != 0:
+        if acq_format == 0:
+            block_size = 250000
+        elif acq_format == 1:
+            block_size = 125000
+        else:
             raise UnexpectedResponseException()
 
         # Read waveform data
         data = bytearray()
 
-        for offset in range(1, points+1, 250000):
+        for offset in range(1, points+1, block_size):
             self._write(":waveform:start %d" % offset)
-            self._write(":waveform:stop %d" % min(points, offset+249999))
+            self._write(":waveform:stop %d" % min(points, offset+block_size-1))
             self._write(":waveform:data?")
             raw_data = self._read_raw()
             data.extend(ivi.decode_ieee_block(raw_data))
 
         # Store in trace object
-        trace.y_raw = array.array('B', data[0:points])
+        if acq_format == 0:
+            trace.y_raw = array.array('B', data[0:points])
+        elif acq_format == 1:
+            trace.y_raw = array.array('H', data[0:points*2])
+
+            if sys.byteorder == 'big':
+                trace.y_raw.byteswap()
 
         # handle digital channels
         if self._channel_name[index] in self._digital_channel_name:
