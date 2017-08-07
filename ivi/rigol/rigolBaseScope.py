@@ -366,9 +366,9 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         self._digital_channel_name = list()
         if (self._digital_channel_count > 0):
             for i in range(self._digital_channel_count):
-                self._channel_name.append("digital%d" % i)
+                self._channel_name.append("d%d" % i)
                 self._channel_label.append("D%d" % i)
-                self._digital_channel_name.append("digital%d" % i)
+                self._digital_channel_name.append("d%d" % i)
 
             for i in range(self._analog_channel_count, self._channel_count):
                 self._channel_input_impedance[i] = 100000
@@ -1075,8 +1075,14 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
         if self._driver_operation_simulate:
             return ivi.TraceYT()
 
+        expected_points = float(self._ask("acquire:srate?"))*(self._horizontal_divisions*float(self._ask("timebase:scale?")))
+
         self._write(":waveform:source %s" % self._channel_name[index])
         self._write(":waveform:format byte")
+        if expected_points == 1200:
+            self._write(":waveform:mode normal")
+        else:
+            self._write(":waveform:mode raw")
 
         trace = ivi.TraceYT()
 
@@ -1109,6 +1115,18 @@ class rigolBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.common
 
         # Store in trace object
         trace.y_raw = array.array('B', data[0:points])
+
+        # handle digital channels
+        if self._channel_name[index] in self._digital_channel_name:
+            trace.y_increment = 1
+
+            if points != 1200:
+                # raw waveform; extract channel from group
+                digital_index = self._digital_channel_name.index(self._channel_name[index])
+                offset = digital_index % 8
+
+                for k in range(points):
+                    trace.y_raw[k] = (trace.y_raw[k] >> offset) & 1
 
         return trace
 
