@@ -1817,6 +1817,9 @@ class Driver(DriverOperation, DriverIdentity, DriverUtility):
             self._initialized_from_constructor = True
             self.initialize(resource, id_query, reset, **kw)
 
+    def __del__(self):
+        self._close()
+
     def _initialize(self, resource = None, id_query = False, reset = False, **keywargs):
         "Opens an I/O session to the instrument."
 
