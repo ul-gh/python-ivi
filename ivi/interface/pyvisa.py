@@ -70,6 +70,14 @@ class PyVisaInstrument:
             self.instrument = resource
         self.buffer = io.BytesIO()
 
+    def __del__(self):
+        self.close()
+
+    def close(self):
+        if self.instrument:
+            self.instrument.close()
+        self.instrument = None
+
     def write_raw(self, data):
         "Write binary data to instrument"
         self.instrument.write_raw(data)

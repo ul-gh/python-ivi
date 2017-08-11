@@ -91,6 +91,14 @@ class SerialInstrument:
         self.message_delay = 0
 
         self.update_settings()
+
+    def __del__(self):
+        self.close()
+
+    def close(self):
+        if self.serial:
+            self.serial.close()
+        self.serial = None
     
     def update_settings(self):
         
