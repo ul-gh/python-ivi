@@ -32,7 +32,7 @@ class agilent4000A(agilent3000A):
     def __init__(self, *args, **kwargs):
         self.__dict__.setdefault('_instrument_id', '')
         
-        super(agilent3000A, self).__init__(*args, **kwargs)
+        super(agilent4000A, self).__init__(*args, **kwargs)
         
         self._analog_channel_name = list()
         self._analog_channel_count = 4
