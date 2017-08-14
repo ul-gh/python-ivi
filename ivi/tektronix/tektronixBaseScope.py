@@ -1303,18 +1303,18 @@ class tektronixBaseScope(scpi.common.IdnCommand, scpi.common.Reset, scpi.common.
 
         # Store in trace object
         if point_fmt == 'RP' and point_size == 1:
-            trace.y_raw = array.array('B', raw_data[0:points*2])
+            trace.y_raw = array.array('B', raw_data[0:points*point_size])
         elif point_fmt == 'RP' and point_size == 2:
-            trace.y_raw = array.array('H', raw_data[0:points*2])
+            trace.y_raw = array.array('H', raw_data[0:points*point_size])
         elif point_fmt == 'RI' and point_size == 1:
-            trace.y_raw = array.array('b', raw_data[0:points*2])
+            trace.y_raw = array.array('b', raw_data[0:points*point_size])
         elif point_fmt == 'RI' and point_size == 2:
-            trace.y_raw = array.array('h', raw_data[0:points*2])
+            trace.y_raw = array.array('h', raw_data[0:points*point_size])
         elif point_fmt == 'FP' and point_size == 4:
             trace.y_increment = 1
             trace.y_reference = 0
             trace.y_origin = 0
-            trace.y_raw = array.array('f', raw_data[0:points*4])
+            trace.y_raw = array.array('f', raw_data[0:points*point_size])
         else:
             raise UnexpectedResponseException()
 
