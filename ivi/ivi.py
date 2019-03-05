@@ -334,7 +334,7 @@ class IndexedPropertyCollection(object):
 
 class IviContainer(PropertyCollection):
     def __init__(self, *args, **kwargs):
-        super(IviContainer, self).__init__(*args, **kwargs)
+        super(IviContainer, self).__init__()
 
     def _add_attribute(self, name, attr, doc = None):
         cur_obj = self
