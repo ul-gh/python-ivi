@@ -62,10 +62,27 @@ class PyVisaInstrument:
     "PyVisa wrapper instrument interface client"
     def __init__(self, resource, *args, **kwargs):
         if type(resource) is str:
-            self.instrument = visa_instrument_opener(resource, *args, **kwargs)
+            i = visa_instrument_opener(resource, *args, **kwargs)
+            # Support for "TCPIPx::aaa.bbb.ccc.ddd::ppppp::SOCKET" resources.
+            # These have no separate control channel, thus a termination character
+            # is always needed. Default newline is good for most instruments.
+            # https://github.com/python-ivi/python-ivi/issues/75
+            if "socket" in resource.lower():
+                if not hasattr(i, "read_termination") or not i.read_termination:
+                    i.read_termination = "\n"
+                if not hasattr(i, "write_termination") or not i.write_termination:
+                    i.write_termination = "\n"
+            # Setting up self.write_termination as a shortcut to the respetive
+            # VISA instrument class property value. This might speed up the
+            # self.write() method further below, although not sure by how much.
+            if hasattr(i, "write_termination"):
+                self.write_termination = i.write_termination
+            else:
+                self.write_termination = ""
             # For compatibility with old style PyVISA
-            if not hasattr(self.instrument, 'assert_trigger'):
-                self.instrument.assert_trigger = self.instrument.trigger
+            if not hasattr(i, 'assert_trigger'):
+                i.assert_trigger = i.trigger
+            self.instrument = i
         else:
             self.instrument = resource
         self.buffer = io.BytesIO()
@@ -104,7 +121,12 @@ class PyVisaInstrument:
             for message_i in message:
                 self.write(message_i, encoding)
             return
-        self.write_raw(str(message).encode(encoding))
+        # Support "TCPIPx::::::SOCKET" resources, see __init__
+        if self.write_termination:
+            message = str(message) + self.write_termination
+        else:
+            message = str(message)
+        self.write_raw(message.encode(encoding))
 
     def read(self, num=-1, encoding = 'utf-8'):
         "Read string from instrument"
