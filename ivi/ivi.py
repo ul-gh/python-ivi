@@ -385,6 +385,14 @@ class IviContainer(PropertyCollection):
         self._add_attribute(name, f, doc)
 
     def _add_property(self, name, fget, fset = None, fdel = None, doc = None):
+        # Dang! Many instrument classes do not provide "doc" as a keyword argument,
+        # while omitting an fset or fdel method - meaning the doc string ends up
+        # as the fset or fdel method. This can not be intentional. Fixing this:
+        if doc is None:
+            if fdel is not None and type(fdel) in (str, Doc):
+                doc = fdel
+            elif fset is not None and type(fset) in (str, Doc):
+                doc = fset
         self._add_attribute(name, (fget, fset, fdel), doc)
 
 

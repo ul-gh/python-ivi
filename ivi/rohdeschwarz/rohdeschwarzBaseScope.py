@@ -52,7 +52,9 @@ VerticalCouplingMapping = {
 TriggerModifierMapping = {
         'none': 'norm', # according to IVI standardization, oscilloscope normal triggde mode is called 'none'
         'normal': 'norm',
-        'auto': 'auto'}
+        'auto': 'auto'
+        'single': 'sing' # FIXME: Set using acquisition configuration for RTB series
+        }
 TriggerCouplingMapping = {
         'ac': ('ac', 0, 0),
         'dc': ('dc', 0, 0),
@@ -239,6 +241,7 @@ class rohdeschwarzBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi
         self._add_property('timebase.real_acquisition_time',
                         self._get_timebase_real_acquisition_time,
                         None,
+                        None,
                         ivi.Doc("""
                         Queries the real acquisition time used in the hardware. If FFT analysis is performed, the value can differ from the adjusted
                         acquisition time (timebase.acquisition_time).
@@ -246,6 +249,7 @@ class rohdeschwarzBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi
 
         self._add_property('timebase.divisions',
                         self._get_timebase_divisions,
+                        None,
                         None,
                         ivi.Doc("""
                         Queries the number of horizontal divisions on the screen.
