@@ -27,48 +27,94 @@ THE SOFTWARE.
 from .rohdeschwarzBaseScope import *
 
 BandwidthMapping = {
-        500e6: 'FULL',
-        200e6: 'B200',
-        100e6: 'B100',
-        50e6: 'B50',
-        20e6: 'B20',
-        10e6: 'B10',
-        5e6: 'B5',
-        2e6: 'B2',
-        1e6: 'B1',
-        500e3: 'B5HK',
-        200e3: 'B2HK',
-        100e3: 'B1HK',
-        50e3: 'B50K',
-        20e3: 'B20K',
-        10e3: 'B10K',
-        5e3: 'B5K',
-        2e3: 'B2K',
-        1e3: 'B1K',
+        500e6: 'full',
+        200e6: 'b200',
+        100e6: 'b100',
+        50e6: 'b50',
+        20e6: 'b20',
+        10e6: 'b10',
+        5e6: 'b5',
+        2e6: 'b2',
+        1e6: 'b1',
+        500e3: 'b5hk',
+        200e3: 'b2hk',
+        100e3: 'b1hk',
+        50e3: 'b50k',
+        20e3: 'b20k',
+        10e3: 'b10k',
+        5e3: 'b5k',
+        2e3: 'b2k',
+        1e3: 'b1k',
         }
-
 AcquisitionInterpolationMapping = dict()
 
 AcquisitionTypeMapping = {
-        'normal': 'SAMP',
-        'sample': 'SAMP',
-        'peak_detect': 'PDET',
-        'high_resolution': 'HRES',
-        'average': 'AVER',
-        'envelope': 'ENV',
+        'normal': 'samp',
+        'sample': 'samp',
+        'peak_detect': 'pdet',
+        'high_resolution': 'hres',
+        'average': 'aver',
+        'envelope': 'env',
         }
-
 VerticalCouplingMapping = {
-        'dc':  'DCL',
-        'ac':  'ACL',
+        'dc':  'dcl',
+        'ac':  'acl',
         # FIXME: No "GND?"
         }
-
 TriggerCouplingMapping = {
         'dc': '', # Is always DC coupled
-        'noise_reject_dc': 'MNR', # Is set via "TRIG:MNR"
+        'noise_reject_dc': 'mnr', # Is set via "TRIG:MNR"
         }
-
+GlitchConditionMapping = {
+        'less_than': 'shor',
+        'greater_than': 'long',
+        }
+WidthConditionMapping = {
+        'longer': 'long',
+        'shorter': 'shor',
+        'equal': 'equ',
+        'nequal': 'neq',
+        'within': 'rang',
+        'outside': 'outs',
+        }
+SampleModeMapping = dict()
+MeasurementFunctionMapping = {
+        'rise_time': 'rtim',
+        'fall_time': 'ftim',
+        'frequency': 'freq',
+        'period': 'per',
+        'voltage_rms': 'rms',
+        'voltage_peak_to_peak': 'pkpk',
+        'voltage_max': 'max',
+        'voltage_min': 'min',
+        'voltage_high': 'topl',
+        'voltage_low': 'bas',
+        'voltage_average': 'mean',
+        'width_negative': 'npul',
+        'width_positive': 'ppul',
+        'duty_cycle_positive': 'pdcy',
+        'duty_cycle_negative': 'ndcy',
+        'amplitude': 'ampl',
+        'overshoot': 'ovrs',
+        'preshoot': 'pres',
+        'phase': 'phas',
+        'delay': 'del',
+        }
+MeasurementFunctionMappingDigital = dict()
+MeasurementStatusMapping = {
+        'complete': 'comp',
+        'in_progress': 'stop',
+        'running': 'run',
+        'break': 'bre',
+        }
+ScreenshotImageFormatMapping = {
+        'png': 'png',
+        'jpg': 'jpg',
+        'bmp': 'bmp',
+        'tiff': 'tiff'
+        }
+TimebaseModeMapping = dict()
+TimebaseReferenceMapping = dict()
 
 class rohdeschwarzRTH1004_500MHz(rohdeschwarzBaseScope):
     "Rohde&Schwarz RTH1004 with 500MHz bandwidth option IVI oscilloscope driver"
